@@ -7,7 +7,7 @@ Large file simple line indexer intended t used from slow LL.
 ### Indexing mached lines
 
 ```
-index -indexdest index/grants2012 -pattern "<doc-number>" -target "../data/grants2012/ipg12011*.xml"
+lindxr index -indexdest index/grants2012 -pattern "<doc-number>" -target "../data/grants2012/ipg12011*.xml"
 ```
 
 ### For subsecting large file
