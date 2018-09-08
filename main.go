@@ -44,10 +44,6 @@ func indexOne(fpath string, idxpath string, pat string, rexp *regexp.Regexp) {
 
 		if rexp.Match(buf) {
 			fmt.Fprintf(fw, "%d:%s\n", count, buf)
-
-			// fmt.Printf("%d:%s\n", count, buf)
-			// fmt.Printf("%d:%s\n", count, string(buf))
-			// fmt.Printf("%d\n", count)
 		}
     }
 
@@ -97,7 +93,61 @@ func indexing(arguments []string)  {
 
 func subsect(arguments []string)  {
 	subCommand := flag.NewFlagSet("sub", flag.ExitOnError)
+
+	start := subCommand.Int("start", -1, "Specifiy start of region. ex: 100")
+	end := subCommand.Int("end", -1, "Specify end of region. ex: 1000")
+	inpath := subCommand.String("input", "", `Path of file to output result. ex: ../data/grants2012/ipg120110.xml`)
+	outpath := subCommand.String("output", "", `Path of file to output result. ex: temp.txt`)
+
 	subCommand.Parse(arguments)
+
+
+	if *start == -1 || *end == -1 || *inpath == "" || *outpath == "" {
+		fmt.Println(`Invalid argument for command "sub"`)
+		subCommand.PrintDefaults()
+		os.Exit(2)
+	}
+
+    fh, err := os.Open(*inpath)
+
+    if err != nil {
+		fmt.Printf("Can't open input file %s\n", *inpath)
+		os.Exit(2)
+    }
+
+	defer fh.Close()
+
+	fout, err := os.Create(*outpath)
+    if err != nil {
+		fmt.Printf("Can't create output file: %s\n", *outpath)
+		os.Exit(2)
+    }
+	defer fout.Close()
+
+
+    fr := bufio.NewReader(fh)
+	fw := bufio.NewWriter(fout)
+
+	buf := make([]byte, 1024)
+	count := 0
+    for {
+		buf, _ , err = fr.ReadLine()
+		if err != nil {
+			fw.Flush()
+			return
+		}
+		count++
+		if count >= *start {
+			fmt.Fprintf(fw, "%s\n", buf)
+		}
+
+		// do not need to read one line more.
+		if count >= *end {
+			fw.Flush()
+			return			
+		}
+	}
+
 }
 
 func main() {
